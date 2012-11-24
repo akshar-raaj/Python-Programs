@@ -1,5 +1,3 @@
-#We will make sure to not pass an empty list here
-
 def concatenate(left_list, pivot, right_list):
     left_list.extend(pivot)
     left_list.extend(right_list)
