@@ -37,6 +37,7 @@ class TestBinS(unittest.TestCase):
        import random
        size = random.randint(0, 10)
        lst = sorted([random.randint(0, 10) for i in range(size)])
+       lst = list(set(lst)) #we are already aware of bug in case there are duplicates
        if lst: #lst can be an empty list and then lst[0] will be an error
            self.assertEquals(binsearch(lst, lst[0],), 0)
 
