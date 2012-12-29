@@ -13,6 +13,14 @@ def permutation(li):
                 stack.append(res)
         return stack
 
-result = permutation(['a', 'b', 'c'])
-print len(result)
-print result
+def permutation_helper(li, r=None):
+    if r and r>len(li):
+        print("You can't arrange %d elements out of %d elements." % (r, len(li)))
+        return
+    else:
+        return permutation(li)
+
+result = permutation_helper(['a', 'b', 'c', 'd'], 5)
+if result:
+    print len(result)
+    print result
