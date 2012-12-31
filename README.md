@@ -17,5 +17,3 @@ Search
 ----------
 
 * Binary Search
-
-
