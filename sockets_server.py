@@ -2,6 +2,23 @@ import socket
 import sys
 import threading
 
+messages = []
+condition = threading.Condition()
+
+class BroadCastThread(threading.Thread):
+
+    def run(self):
+        global messages
+        while True:
+            condition.acquire()
+            if not messages:
+                condition.wait()
+            message = messages.pop(0)
+            condition.release()
+            for thread in threading.enumerate():
+                if isinstance(thread, ChatThread):
+                    thread.conn.sendall(message)
+
 class ChatThread(threading.Thread):
     def __init__(self, conn, addr):
         super(ChatThread, self).__init__()
@@ -11,13 +28,16 @@ class ChatThread(threading.Thread):
 
     def run(self):
         while True:
+            global messages
             data = self.conn.recv(1024)
-            print "data " + data + str(len(data))
             if data=="\r\n":
                 break
-            self.conn.sendall(data)
+            condition.acquire()
+            messages.append(data)
+            condition.notify()
+            condition.release()
         self.conn.close()
-        print "Conection closed with " + addr[0] + ":" + str(addr[1])
+        print "Conection closed with " + self.addr[0] + ":" + str(self.addr[1])
 
 HOST = ''
 PORT = 8888
@@ -27,7 +47,6 @@ try:
 except:
     print "Can't create socket"
     sys.exit()
-
 print "socket created"
 
 try:
@@ -35,12 +54,12 @@ try:
 except socket.error:
     print "Cant bind"
     sys.exit()
-
 print 'Socket bind complete'
 
 s.listen(10)
 print 'Socket now listening'
 
+BroadCastThread().start()
 while 1:
     conn, addr = s.accept()
     t = ChatThread(conn, addr)
