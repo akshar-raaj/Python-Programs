@@ -13,11 +13,12 @@ class BroadCastThread(threading.Thread):
             condition.acquire()
             if not messages:
                 condition.wait()
-            message = messages.pop(0)
+            message, conn_addr = messages.pop(0)
             condition.release()
             for thread in threading.enumerate():
                 if isinstance(thread, ChatThread):
-                    thread.conn.sendall(message)
+                    if not conn_addr==thread.conn_addr:
+                        thread.conn.sendall(message)
 
 class ChatThread(threading.Thread):
     def __init__(self, conn, addr):
@@ -25,6 +26,7 @@ class ChatThread(threading.Thread):
         self.conn = conn
         self.addr = addr
         print 'Connected with ' + addr[0] + ':' + str(addr[1])
+        self.conn_addr = addr[0] + ':' + str(addr[1])
 
     def run(self):
         while True:
@@ -33,7 +35,7 @@ class ChatThread(threading.Thread):
             if data=="\r\n":
                 break
             condition.acquire()
-            messages.append(data)
+            messages.append((data, self.conn_addr))
             condition.notify()
             condition.release()
         self.conn.close()
