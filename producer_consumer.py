@@ -1,10 +1,9 @@
-from threading import Thread, Condition
+from threading import Thread
 import time
 import random
+from Queue import Queue
  
-queue = []
-MAX_NUM = 10
-condition = Condition()
+queue = Queue(10)
  
 class ProducerThread(Thread):
     #Put limit on num of elements in queue
@@ -12,16 +11,9 @@ class ProducerThread(Thread):
         nums = range(5)
         global queue
         while True:
-            condition.acquire()
-            if len(queue) == MAX_NUM:
-                print "Queue full, producer is waiting"
-                condition.wait()
-                print "Space in queue, Consumer notified the producer"
             num = random.choice(nums)
-            queue.append(num)
+            queue.put(num)
             print "Produced", num
-            condition.notify()
-            condition.release()
             time.sleep(random.random())
  
  
@@ -29,15 +21,8 @@ class ConsumerThread(Thread):
     def run(self):
         global queue
         while True:
-            condition.acquire()
-            if not queue:
-                print "Nothing in queue, consumer is waiting"
-                condition.wait()
-                print "Producer added something to queue and notified the consumer"
-            num = queue.pop(0)
+            num = queue.get()
             print "Consumed", num
-            condition.notify()
-            condition.release()
             time.sleep(random.random())
  
  
