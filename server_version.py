@@ -6,4 +6,3 @@ row=cursor.fetchone()
 print "server version ",row[0]
 cursor.close()
 conn.close()
-
