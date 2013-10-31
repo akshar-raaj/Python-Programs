@@ -39,24 +39,23 @@ HOST = ''
 PORT = 8888
 
 try:
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 except socket.error:
     print "Can't create socket"
     sys.exit()
 print "socket created"
 
 try:
-    s.bind((HOST, PORT))
+    sock.bind((HOST, PORT))
 except socket.error:
     print "Cant bind"
     sys.exit()
 print 'Socket bind complete'
 
-s.listen(10)
+sock.listen(10)
 print 'Socket now listening'
 
 BroadCastThread().start()
 while True:
-    conn, addr = s.accept()
-    t = ChatThread(conn, addr)
-    t.start()
+    conn, addr = sock.accept()
+    ChatThread(conn, addr).start()
